@@ -524,7 +524,6 @@ class RoboFile extends \Robo\Tasks
             ->taskFilesystemStack()
                 ->copy('CHANGELOG.md', 'docs/changelog.md')
             ->completion($this->taskFilesystemStack()->remove('docs/changelog.md'))
-            ->taskExec('mkdocs gh-deploy')
             ->run();
 
         $this->taskGitStack()
