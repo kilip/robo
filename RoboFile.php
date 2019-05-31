@@ -498,7 +498,7 @@ class RoboFile extends \Robo\Tasks
     {
         $this->checkPharReadonly();
 
-        $version = shell_exec('git describe --tags `git rev-list --tags --max-count=1`');
+        $version = exec('git describe --tags `git rev-list --tags --max-count=1`');
 
         if(false === strpos($version,'lurker')){
             $version = trim($version).'-lurker';
@@ -508,6 +508,8 @@ class RoboFile extends \Robo\Tasks
         $this->taskGitStack()
             ->push('origin',':refs/tags/'.$version)
             ->run();
+
+        exec('git tag -d '.$version);
 
         $this->taskGitStack()
                 ->add('-A')
