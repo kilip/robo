@@ -498,7 +498,7 @@ class RoboFile extends \Robo\Tasks
     {
         $this->checkPharReadonly();
 
-        $version =$this->taskExec('git describe --tags `git rev-list --tags --max-count=1`')->run()->getMessage();
+        $version = shell_exec('git describe --tags `git rev-list --tags --max-count=1`');
         $version = $version.'-lurker';
 
         $this->yell("Releasing Robo $version");
