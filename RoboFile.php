@@ -488,7 +488,7 @@ class RoboFile extends \Robo\Tasks
                 ->rename('robo-release.phar', 'robotheme/robo.phar')
             ->taskGitStack()
                 ->add('robotheme/robo.phar')
-                ->commit('Update robo.phar to ' . \Robo\Robo::VERSION)
+                ->commit('Update robo.phar to ' . $version)
                 ->push('origin site')
                 ->checkout('lurker')
                 ->run();
@@ -502,7 +502,7 @@ class RoboFile extends \Robo\Tasks
         $version = trim($version).'-lurker';
 
         $this->yell("Releasing Robo $version");
-        
+
         $this->taskGitStack()
                 ->add('-A')
                 ->commit("Robo release $version")
