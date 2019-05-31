@@ -467,4 +467,62 @@ class RoboFile extends \Robo\Tasks
                 ->checkout('1.x')
                 ->run();
     }
+
+    /**
+     * Publish Robo phar.
+     *
+     * Commits the phar executable to Robo's GitHub pages site.
+     */
+    public function lurkerPharPublish($version)
+    {
+        $this->pharBuild();
+
+        $this->collectionBuilder()
+            ->taskFilesystemStack()
+            ->rename('robo.phar', 'robo-release.phar')
+            ->taskGitStack()
+            ->checkout('site')
+            ->pull('origin site')
+            ->taskFilesystemStack()
+            ->remove('robotheme/robo.phar')
+            ->rename('robo-release.phar', 'robotheme/robo.phar')
+            ->taskGitStack()
+            ->add('robotheme/robo.phar')
+            ->commit('Update robo.phar to ' . $version)
+            ->push('origin site')
+            ->checkout('lurker')
+            ->run();
+    }
+
+    public function lurkerRelease()
+    {
+        $this->checkPharReadonly();
+
+        $version =$this->taskExec('git describe --tags `git rev-list --tags --max-count=1`')->run()->getMessage();
+        $version = $version.'-lurker';
+
+        $this->writeVersion($version);
+        $this->yell("Releasing Robo $version");
+
+        $this->docs();
+        $this->taskGitStack()
+            ->add('-A')
+            ->commit("Robo release $version")
+            ->pull()
+            ->push()
+            ->run();
+        $this->taskGitStack()
+            ->merge('1.x')
+            ->run();
+
+        return;
+
+        $this->publish();
+        $this->taskGitStack()
+            ->tag($version)
+            ->push('origin lurker --tags')
+            ->run();
+
+        $this->lurkerPharPublish($version);
+    }
 }
