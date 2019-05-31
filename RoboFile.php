@@ -511,6 +511,7 @@ class RoboFile extends \Robo\Tasks
 
         exec('git tag -d '.$version);
 
+        //$this->docs();
         $this->taskGitStack()
                 ->add('-A')
                 ->commit("Robo release $version")
