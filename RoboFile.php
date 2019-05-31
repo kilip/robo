@@ -479,19 +479,19 @@ class RoboFile extends \Robo\Tasks
 
         $this->collectionBuilder()
             ->taskFilesystemStack()
-            ->rename('robo.phar', 'robo-release.phar')
+                ->rename('robo.phar', 'robo-release.phar')
             ->taskGitStack()
-            ->checkout('site')
-            ->pull('origin site')
+                ->checkout('site')
+                ->pull('origin site')
             ->taskFilesystemStack()
-            ->remove('robotheme/robo.phar')
-            ->rename('robo-release.phar', 'robotheme/robo.phar')
+                ->remove('robotheme/robo.phar')
+                ->rename('robo-release.phar', 'robotheme/robo.phar')
             ->taskGitStack()
-            ->add('robotheme/robo.phar')
-            ->commit('Update robo.phar to ' . $version)
-            ->push('origin site')
-            ->checkout('lurker')
-            ->run();
+                ->add('robotheme/robo.phar')
+                ->commit('Update robo.phar to ' . \Robo\Robo::VERSION)
+                ->push('origin site')
+                ->checkout('lurker')
+                ->run();
     }
 
     public function lurkerRelease()
@@ -501,23 +501,32 @@ class RoboFile extends \Robo\Tasks
         $version =$this->taskExec('git describe --tags `git rev-list --tags --max-count=1`')->run()->getMessage();
         $version = $version.'-lurker';
 
-        $this->writeVersion($version);
         $this->yell("Releasing Robo $version");
 
-        $this->docs();
         $this->taskGitStack()
-            ->add('-A')
-            ->commit("Robo release $version")
-            ->pull()
-            ->push()
+                ->add('-A')
+                ->commit("Robo release $version")
+                ->pull()
+                ->push()
             ->run();
+
         $this->taskGitStack()
             ->merge('1.x')
             ->run();
 
-        return;
+        $current_branch = exec('git rev-parse --abbrev-ref HEAD');
 
-        $this->publish();
+        return $this->collectionBuilder()
+            ->taskGitStack()
+                ->checkout('site')
+                ->merge('lurker')
+            ->completion($this->taskGitStack()->checkout($current_branch))
+            ->taskFilesystemStack()
+                ->copy('CHANGELOG.md', 'docs/changelog.md')
+            ->completion($this->taskFilesystemStack()->remove('docs/changelog.md'))
+            ->taskExec('mkdocs gh-deploy')
+            ->run();
+
         $this->taskGitStack()
             ->tag($version)
             ->push('origin lurker --tags')
