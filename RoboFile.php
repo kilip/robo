@@ -516,7 +516,7 @@ class RoboFile extends \Robo\Tasks
 
         $current_branch = exec('git rev-parse --abbrev-ref HEAD');
 
-        return $this->collectionBuilder()
+        $this->collectionBuilder()
             ->taskGitStack()
                 ->checkout('site')
                 ->merge('lurker')
