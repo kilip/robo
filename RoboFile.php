@@ -488,7 +488,7 @@ class RoboFile extends \Robo\Tasks
                 ->rename('robo-release.phar', 'robotheme/robo.phar')
             ->taskGitStack()
                 ->add('robotheme/robo.phar')
-                ->commit('Update robo.phar to ' . \Robo\Robo::VERSION)
+                ->commit('Update robo.phar to ' . $version)
                 ->push('origin site')
                 ->checkout('lurker')
                 ->run();
@@ -499,10 +499,12 @@ class RoboFile extends \Robo\Tasks
         $this->checkPharReadonly();
 
         $version = shell_exec('git describe --tags `git rev-list --tags --max-count=1`');
-        $version = trim($version).'-lurker';
+        if(false === strpos($version,'lurker')){
+            $version = trim($version).'-lurker';
+        }
 
         $this->yell("Releasing Robo $version");
-        
+
         $this->taskGitStack()
                 ->add('-A')
                 ->commit("Robo release $version")
