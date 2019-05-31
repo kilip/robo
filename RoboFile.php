@@ -528,10 +528,8 @@ class RoboFile extends \Robo\Tasks
             ->taskGitStack()
                 ->checkout('site')
                 ->merge('lurker')
+                ->push()
             ->completion($this->taskGitStack()->checkout($current_branch))
-            ->taskFilesystemStack()
-                ->copy('CHANGELOG.md', 'docs/changelog.md')
-            ->completion($this->taskFilesystemStack()->remove('docs/changelog.md'))
             ->run();
 
         $this->taskGitStack()
